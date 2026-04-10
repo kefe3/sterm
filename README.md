@@ -18,7 +18,7 @@ Sistemi klonlamak ve çalıştırmak için terminalinize aşağıdaki komutları
 
 ```bash
 # Depoyu klonlayın
-git clone [https://github.com/kefe3/sterm.git](https://github.com/kefe3/sterm.git)
+git clone https://github.com/kefe3/sterm.git
 
 # Klasöre giriş yapın
 cd sterm
