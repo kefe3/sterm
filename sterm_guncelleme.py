@@ -3,7 +3,7 @@
 # ------------------------------------------------------------------
 # Proje: STerm - Terminal Ekosistemi (Evrensel)
 # Ekip: Kapsül Serix Takımı
-# Versiyon: 1.8 (Expansion & Auto-Update Edition)
+# Versiyon: 1.9 (Smart Update & Final Command Center)
 # ------------------------------------------------------------------
 
 import os
@@ -14,10 +14,11 @@ import shutil
 import platform
 import datetime
 import webbrowser
-import requests  # pip install requests
+import requests
+import time
 
 # --- YAPILANDIRMA ---
-SURUM = "1.8"
+SURUM = "1.9"
 GUNCELLEME_URL = "https://raw.githubusercontent.com/kefe3/sterm/refs/heads/main/sterm_guncelleme.py"
 
 def ekrani_temizle():
@@ -26,12 +27,20 @@ def ekrani_temizle():
 def guncelleme_denetle():
     print("\033[1;33m🔄 Serix Bulut Sunucularına Bağlanılıyor...\033[0m")
     try:
-        yanit = requests.get(GUNCELLEME_URL, timeout=10)
+        # Cache (önbellek) sorununu önlemek için zaman damgası ekliyoruz
+        taze_url = f"{GUNCELLEME_URL}?t={int(time.time())}"
+        yanit = requests.get(taze_url, timeout=10)
+        
         if yanit.status_code == 200:
-            with open(__file__, "w", encoding="utf-8") as f:
-                f.write(yanit.text)
-            print("\033[1;32m✅ STerm Başarıyla Güncellendi! Lütfen programı yeniden başlatın.\033[0m")
-            sys.exit()
+            # Gelen kodun içindeki sürümü ayıkla
+            yeni_kod = yanit.text
+            if f'SURUM = "{SURUM}"' in yeni_kod:
+                print(f"\033[1;32m✅ Zaten en güncel sürümü (v{SURUM}) kullanıyorsunuz!\033[0m")
+            else:
+                with open(__file__, "w", encoding="utf-8") as f:
+                    f.write(yeni_kod)
+                print("\033[1;32m✅ STerm Başarıyla Güncellendi! Lütfen programı yeniden başlatın.\033[0m")
+                sys.exit()
         else:
             print(f"\033[1;31m❌ Güncelleme sunucusuna ulaşılamadı. Hata: {yanit.status_code}\033[0m")
     except Exception as e:
@@ -56,7 +65,7 @@ def yardim_bas():
     print("  yd [dizin]    : Dizin Değiştir (cd)            | gezgin         : Dosyaları Listele")
     print("  yarat [isim]  : Yeni Klasör Oluştur            | sil [isim]     : Dosya/Klasör Sil")
     print("  ara [isim]    : Dosya Ara                      | boyut [isim]   : Dosya Boyutu (KB)")
-    print("  oku [dosya]   : Dosya İçeriğini Oku            | gezgin         : Klasör İçeriği")
+    print("  oku [dosya]   : Dosya İçeriğini Oku            | disk           : Depolama Bilgisi")
     
     print("\033[1;33m[AKILLI ARAÇLAR]")
     print("  hava [sehir]  : Hava Durumunu Göster           | hesapla [işlem]: Matematiksel Çözüm")
@@ -71,7 +80,6 @@ def yardim_bas():
 def main():
     banner_goster()
     yardim_bas()
-    gunluk_kayitlar = []
 
     while True:
         try:
@@ -89,7 +97,6 @@ def main():
             giris = input(prompt).strip()
             if not giris: continue
             
-            gunluk_kayitlar.append(f"[{datetime.datetime.now().strftime('%H:%M:%S')}] {giris}")
             parcalar = giris.split()
             komut = parcalar[0].lower()
             arguman = " ".join(parcalar[1:])
@@ -106,7 +113,7 @@ def main():
             # --- ARAÇLAR ---
             elif komut == "hava":
                 sehir = arguman if arguman else "Konya"
-                os.system(f"curl -s wttr.in/{sehir}?format=3" if is_windows else f"curl wttr.in/{sehir}?format=3")
+                os.system(f"curl -s wttr.in/{sehir}?format=3")
             
             elif komut == "hesapla":
                 try: print(f"🔢 Sonuç: {eval(arguman)}")
@@ -161,7 +168,7 @@ def main():
             elif komut == "yeniden": os.system("shutdown /r /t 1" if is_windows else "reboot")
             elif komut == "kilitle": os.system("rundll32.exe user32.dll,LockWorkStation" if is_windows else "gnome-screensaver-command -l")
 
-            else: os.system(giris) # Bilinmeyen komutları sisteme gönder
+            else: os.system(giris)
 
         except KeyboardInterrupt: print("\n'çıkış' yazın.")
         except Exception as e: print(f"❌ Hata: {e}")
