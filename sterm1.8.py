@@ -18,8 +18,7 @@ import requests  # pip install requests
 
 # --- YAPILANDIRMA ---
 SURUM = "1.8"
-# ÖNEMLİ: Bu linki GitHub'daki yeni sabit dosyanın RAW linkiyle değiştir!
-GUNCELLEME_URL = "https://raw.githubusercontent.com/kefe3/sterm/main/sterm.py"
+GUNCELLEME_URL = "https://raw.githubusercontent.com/kefe3/sterm/refs/heads/main/sterm_guncelleme.py"
 
 def ekrani_temizle():
     os.system('cls' if os.name == 'nt' else 'clear')
